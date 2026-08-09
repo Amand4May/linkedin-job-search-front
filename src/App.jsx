@@ -1,70 +1,204 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Search, MapPin } from 'lucide-react';
 import Header from './components/Header';
 import Footer from './components/Footer';
 
 const mockVagas = [
-  { id: "1", titulo: "Desenvolvedor Front-end React", empresa: "TechCorp", local: "Remoto", url_vaga: "#" },
-  { id: "2", titulo: "Engenheiro de Dados Python", empresa: "DataLytics", local: "São Paulo, SP", url_vaga: "#" },
-  { id: "3", titulo: "Desenvolvedor Full-Stack", empresa: "InovaTech", local: "Campinas, SP (Híbrido)", url_vaga: "#" },
-  { id: "4", titulo: "DevOps Engineer", empresa: "CloudN", local: "Remoto", url_vaga: "#" },
+  {
+    id: '4403070416',
+    title: 'Analista de Recursos Humanos',
+    company_name: 'RHBH',
+    location: 'Belo Horizonte, Minas Gerais, Brazil',
+    posted_time: '3 months ago',
+    description: 'Vaga para atuação no setor de RH. Gestão geral do setor de RH...',
+    url: 'https://www.linkedin.com/jobs/view/4403070416'
+  },
+  {
+    id: '4447342219',
+    title: 'Analista de RH JR',
+    company_name: 'BBM Logística',
+    location: 'São José dos Pinhais, Paraná, Brazil',
+    posted_time: '4 days ago',
+    description: '🚀 Estamos contratando | Analista de Recursos Humanos Jr...',
+    url: 'https://www.linkedin.com/jobs/view/4447342219'
+  },
+  {
+    id: '9999999999',
+    title: 'Desenvolvedor Front-end',
+    company_name: 'TechCorp',
+    location: 'Remoto',
+    posted_time: '1 dia atrás',
+    description: 'Vaga 100% remota para atuar com React e Tailwind CSS...',
+    url: '#'
+  }
 ];
 
 export default function App() {
-  const [vagas, setVagas] = useState([]);
+  const [vagas, setVagas] = useState(mockVagas);
   const [carregando, setCarregando] = useState(false);
-  const [termoBusca, setTermoBusca] = useState('');
-  const [fezBusca, setFezBusca] = useState(false);
   
-  // Controle do Tema
+  const [termoBusca, setTermoBusca] = useState('');
+  const [localBusca, setLocalBusca] = useState('');
+  const [apenasRemoto, setApenasRemoto] = useState(false);
+  
+  // Estados para a API de Cidades
+  const [listaCidades, setListaCidades] = useState([]);
+  const [mostrarSugestoes, setMostrarSugestoes] = useState(false);
+  
+  const [fezBusca, setFezBusca] = useState(false);
   const [temaEscuro, setTemaEscuro] = useState(false);
   const toggleTema = () => setTemaEscuro(!temaEscuro);
 
+  // Carrega TODOS os municípios do Brasil assim que a página abre
+  // OBS: a BrasilAPI (/api/ibge/municipios/v1) exige a sigla do estado no path
+  // e não tem rota pra listar o Brasil inteiro de uma vez - por isso a chamada
+  // antiga nunca preenchia listaCidades. A API oficial do IBGE tem esse endpoint único.
+  useEffect(() => {
+    fetch('https://servicodados.ibge.gov.br/api/v1/localidades/municipios')
+      .then(res => res.json())
+      .then(data => {
+        // Normaliza pro mesmo shape que o resto do componente espera:
+        // { nome, codigo_ibge, estado }
+        const cidades = data.map(m => ({
+          nome: m.nome,
+          codigo_ibge: m.id,
+          estado: m.microrregiao?.mesorregiao?.UF?.sigla || ''
+        }));
+        setListaCidades(cidades);
+      })
+      .catch(err => console.error("Erro ao carregar cidades da API", err));
+  }, []);
+
+  // Filtra em tempo real a partir de 2 letras digitadas
+  const sugestoesLocais = localBusca.trim().length < 2 ? [] : listaCidades.filter(cidade => 
+    cidade.nome.toLowerCase().includes(localBusca.toLowerCase())
+  ).slice(0, 6); // Limita a 6 sugestões para não poluir a tela
+
   const handleBuscar = (e) => {
     e.preventDefault();
-    if (!termoBusca.trim()) return;
-
     setCarregando(true);
     setFezBusca(true);
+    setMostrarSugestoes(false);
 
     setTimeout(() => {
-      const resultados = mockVagas.filter(vaga => 
-        vaga.titulo.toLowerCase().includes(termoBusca.toLowerCase()) ||
-        vaga.empresa.toLowerCase().includes(termoBusca.toLowerCase())
-      );
+      const resultados = mockVagas.filter(vaga => {
+        const bateCargo = termoBusca.trim() === '' || 
+          vaga.title.toLowerCase().includes(termoBusca.toLowerCase()) || 
+          vaga.company_name.toLowerCase().includes(termoBusca.toLowerCase());
+        
+        if (apenasRemoto) {
+          return bateCargo && vaga.location.toLowerCase().includes('remoto');
+        }
+
+        const bateLocal = localBusca.trim() === '' || 
+          vaga.location.toLowerCase().includes(localBusca.toLowerCase());
+
+        return bateCargo && bateLocal;
+      });
       
       setVagas(resultados);
       setCarregando(false);
-    }, 1200);
+    }, 800);
   };
 
   return (
     <div className={temaEscuro ? 'dark' : ''}>
-      
-      {/* O app usa as nossas variáveis (bg-fundo, text-texto) */}
       <div className="min-h-screen flex flex-col bg-fundo text-texto font-sans transition-colors duration-300">
         
         <Header temaEscuro={temaEscuro} toggleTema={toggleTema} />
 
-        <main className="flex-grow w-full max-w-4xl mx-auto p-8 flex flex-col">
-          <div className="text-center mb-10 mt-6">
-            <h1 className="text-4xl font-extrabold mb-4">Encontre seu próximo emprego</h1>
-            <p className="text-mutado mb-8 font-medium">Busque oportunidades no LinkedIn rapidamente.</p>
+        <main className="flex-grow w-full max-w-5xl mx-auto p-6 flex flex-col">
+          <div className="text-center mb-12 mt-8">
+            <h1 className="text-4xl sm:text-5xl font-extrabold mb-4 transition-all">
+              Encontre seu próximo emprego
+            </h1>
+            <p className="text-mutado mb-10 font-medium text-lg">
+              Busque oportunidades no LinkedIn de forma inteligente.
+            </p>
             
-            <form onSubmit={handleBuscar} className="flex gap-2 max-w-2xl mx-auto">
-              <input 
-                type="text" 
-                placeholder="Ex: React, Python, Front-end..."
-                className="w-full p-4 rounded-lg border-2 border-borda bg-card text-texto focus:outline-none focus:ring-2 focus:ring-destaque shadow-sm transition-colors"
-                value={termoBusca}
-                onChange={(e) => setTermoBusca(e.target.value)}
-              />
-              <button 
-                type="submit" 
-                disabled={carregando}
-                className="bg-primaria hover:bg-hover text-[#fffefe] font-bold py-4 px-8 rounded-lg transition disabled:opacity-50 cursor-pointer shadow-sm"
-              >
-                {carregando ? 'Buscando...' : 'Buscar'}
-              </button>
+            <form onSubmit={handleBuscar} className="max-w-4xl mx-auto relative">
+              
+              <div className="flex flex-col md:flex-row bg-card rounded-2xl md:rounded-full border-2 border-borda focus-within:border-destaque focus-within:ring-4 focus-within:ring-destaque/20 transition-all shadow-md">
+                
+                {/* Campo 1: Cargo ou Empresa */}
+                <div className="flex-grow flex items-center px-6 py-4 md:py-2 border-b-2 md:border-b-0 md:border-r-2 border-borda">
+                  <Search className="text-mutado mr-3" size={24} />
+                  <input 
+                    type="text" 
+                    placeholder="Cargo ou empresa"
+                    className="w-full bg-transparent text-texto focus:outline-none text-lg placeholder:opacity-50"
+                    value={termoBusca}
+                    onChange={(e) => setTermoBusca(e.target.value)}
+                  />
+                </div>
+
+                {/* Campo 2: Localização via API */}
+                <div className="w-full md:w-56 flex items-center px-4 py-4 md:py-2">
+                  <MapPin className="text-mutado mr-2" size={20} />
+                  <input 
+                    type="text" 
+                    placeholder="Cidade..."
+                    className="w-full bg-transparent text-texto focus:outline-none text-base placeholder:opacity-50 disabled:opacity-30"
+                    value={localBusca}
+                    onChange={(e) => {
+                      setLocalBusca(e.target.value);
+                      setMostrarSugestoes(true);
+                    }}
+                    onFocus={() => setMostrarSugestoes(true)}
+                    disabled={apenasRemoto}
+                  />
+                </div>
+
+                {/* Botão de Buscar */}
+                <div className="p-2">
+                  <button 
+                    type="submit" 
+                    disabled={carregando}
+                    className="w-full md:w-auto bg-primaria hover:bg-hover text-[#fffefe] font-bold py-3 px-8 rounded-xl md:rounded-full transition disabled:opacity-50 cursor-pointer text-lg"
+                  >
+                    {carregando ? 'Buscando...' : 'Buscar'}
+                  </button>
+                </div>
+              </div>
+
+              {/* Dropdown de Sugestões da API */}
+              {mostrarSugestoes && sugestoesLocais.length > 0 && !apenasRemoto && (
+                <div className="absolute left-0 right-0 mt-2 bg-card border-2 border-destaque rounded-2xl shadow-2xl overflow-hidden z-50 text-left">
+                  {sugestoesLocais.map((cidade) => (
+                    <div 
+                      key={cidade.codigo_ibge}
+                      className="px-6 py-3 hover:bg-destaque hover:text-[#fffefe] cursor-pointer transition font-semibold text-sm border-b border-borda last:border-b-0 flex justify-between items-center"
+                      onClick={() => {
+                        setLocalBusca(cidade.nome);
+                        setMostrarSugestoes(false);
+                      }}
+                    >
+                      <span> {cidade.nome}</span>
+                      <span className="text-xs opacity-60 uppercase">{cidade.estado || ''}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Botão Toggle de Vagas Remotas */}
+              <div className="mt-6 flex justify-center items-center gap-3">
+                <span className={`font-semibold ${apenasRemoto ? 'text-destaque' : 'text-mutado'}`}>
+                  Apenas vagas remotas
+                </span>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input 
+                    type="checkbox" 
+                    className="sr-only peer" 
+                    checked={apenasRemoto}
+                    onChange={(e) => {
+                      setApenasRemoto(e.target.checked);
+                      if(e.target.checked) setLocalBusca('');
+                    }}
+                  />
+                  <div className="w-12 h-6 bg-borda rounded-full peer peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-[#fffefe] after:border after:border-gray-300 after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-destaque"></div>
+                </label>
+              </div>
+
             </form>
           </div>
 
@@ -75,24 +209,43 @@ export default function App() {
           )}
 
           {!carregando && fezBusca && vagas.length === 0 && (
-            <p className="text-center text-mutado mt-10 flex-grow font-semibold">Nenhuma vaga encontrada para "{termoBusca}".</p>
+            <p className="text-center text-mutado mt-10 flex-grow font-semibold">
+              Nenhuma vaga encontrada para sua busca.
+            </p>
           )}
 
           {!carregando && vagas.length > 0 && (
             <div className="grid gap-6">
               {vagas.map((vaga) => (
                 <div key={vaga.id} className="border-2 border-borda bg-card p-6 rounded-xl shadow-sm hover:shadow-md transition">
-                  <h2 className="text-2xl font-bold">{vaga.titulo}</h2>
-                  <div className="mt-2 text-mutado font-bold">{vaga.empresa}</div>
-                  <div className="opacity-80 text-sm mt-1">{vaga.local}</div>
-                  <a
-                    href={vaga.url_vaga}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-block mt-6 bg-transparent border-2 border-destaque text-destaque font-bold px-5 py-2 rounded-lg hover:bg-destaque hover:text-[#fffefe] transition"
-                  >
-                    Ver no LinkedIn
-                  </a>
+                  <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
+                    <div>
+                      <h2 className="text-2xl font-bold">{vaga.title}</h2>
+                      <div className="mt-1 text-mutado font-bold text-lg">{vaga.company_name}</div>
+                      
+                      <div className="flex flex-wrap gap-3 mt-3">
+                        <span className="opacity-90 text-sm font-semibold px-3 py-1 rounded-full border bg-fundo border-borda">
+                          📍 {vaga.location}
+                        </span>
+                        <span className="opacity-80 text-sm font-medium bg-fundo px-3 py-1 rounded-full border border-borda">
+                          ⏱️ {vaga.posted_time}
+                        </span>
+                      </div>
+                    </div>
+
+                    <a
+                      href={vaga.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block text-center bg-transparent border-2 border-destaque text-destaque font-bold px-6 py-2 rounded-lg hover:bg-destaque hover:text-[#fffefe] transition whitespace-nowrap"
+                    >
+                      Ver no LinkedIn
+                    </a>
+                  </div>
+                  
+                  <p className="mt-5 text-sm opacity-90 line-clamp-3">
+                    {vaga.description}
+                  </p>
                 </div>
               ))}
             </div>
