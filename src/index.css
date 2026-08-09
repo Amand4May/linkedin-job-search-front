@@ -22,6 +22,20 @@
     --color-destaque: #ff085b;
     --color-borda: #7f0a32;
   }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    min-height: 100vh;
+    margin: 0;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--color-destaque);
+    outline-offset: 3px;
+  }
 }
 
 @theme {
@@ -33,4 +47,16 @@
   --color-hover: var(--color-hover);
   --color-destaque: var(--color-destaque);
   --color-borda: var(--color-borda);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }

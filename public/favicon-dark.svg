@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Fundo com o azul principal da marca -->
+  <rect width="64" height="64" rx="14" fill="#aa083f" />
+  
+  <!-- Letra J em branco, e o 'In' completo no azul claro de destaque -->
+  <text x="50%" y="50%" dominant-baseline="central" text-anchor="middle" font-family="system-ui, -apple-system, sans-serif" font-weight="900" font-size="32" fill="#ffffff">
+    J<tspan fill="#ff085b">In</tspan>
+  </text>
+</svg>
