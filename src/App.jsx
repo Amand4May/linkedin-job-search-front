@@ -1,28 +1,68 @@
-import { useState } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Header from './components/Header';
-import Footer from './components/Footer';
-import Home from './pages/Home';
-import Contato from './pages/Contato';
+import { Suspense, lazy, useEffect, useState } from 'react';
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 
-export default function App() {
+const Header = lazy(() => import('./components/Header'));
+const Footer = lazy(() => import('./components/Footer'));
+const Home = lazy(() => import('./pages/Home'));
+const Contato = lazy(() => import('./pages/Contato'));
+
+function RouteTitleUpdater() {
+  const location = useLocation();
+
+  useEffect(() => {
+    const titles = {
+      '/': 'JobIn | Buscador de vagas no LinkedIn',
+      '/contato': 'Contato | JobIn',
+    };
+
+    document.title = titles[location.pathname] || 'JobIn';
+  }, [location.pathname]);
+
+  return null;
+}
+
+function AppContent() {
   const [temaEscuro, setTemaEscuro] = useState(false);
-  const toggleTema = () => setTemaEscuro(!temaEscuro);
+  const toggleTema = () => setTemaEscuro((valor) => !valor);
+
+  useEffect(() => {
+    const faviconLink = document.querySelector("link[rel*='icon']");
+
+    if (faviconLink) {
+      faviconLink.href = temaEscuro ? '/favicon-dark.svg' : '/favicon-light.svg';
+      return;
+    }
+
+    const novoFavicon = document.createElement('link');
+    novoFavicon.rel = 'icon';
+    novoFavicon.type = 'image/svg+xml';
+    novoFavicon.href = temaEscuro ? '/favicon-dark.svg' : '/favicon-light.svg';
+    document.head.appendChild(novoFavicon);
+  }, [temaEscuro]);
 
   return (
-    <BrowserRouter>
-      <div className={temaEscuro ? 'dark' : ''}>
-        <div className="min-h-screen flex flex-col bg-fundo text-texto font-sans transition-colors duration-300">
-          <Header temaEscuro={temaEscuro} toggleTema={toggleTema} />
-          
+    <div className={temaEscuro ? 'dark' : ''}>
+      <div className="min-h-screen flex flex-col bg-fundo text-texto font-sans transition-colors duration-300">
+        <Header temaEscuro={temaEscuro} toggleTema={toggleTema} />
+
+        <Suspense fallback={<div className="flex-grow flex items-center justify-center p-8 text-mutado font-semibold">Carregando...</div>}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/contato" element={<Contato />} />
           </Routes>
-          
-          <Footer />
-        </div>
+        </Suspense>
+
+        <Footer />
       </div>
+    </div>
+  );
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <RouteTitleUpdater />
+      <AppContent />
     </BrowserRouter>
   );
 }
