@@ -1,16 +1,88 @@
-# React + Vite
+# 💼 JobIn
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> A modern web application designed to streamline the job search process by aggregating and analyzing opportunities from LinkedIn efficiently.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🚀 Features
 
-## React Compiler
+* **Smart Job Search:** Filter jobs by title, category, and location with responsive autocomplete support.
+* **Modern UI/UX:** Clean, responsive interface built with React.js and Tailwind CSS.
+* **Dynamic Theme Switching:** Seamless light and dark mode integration with real-time dynamic favicons.
+* **API Service Architecture:** Centralized service layer designed for clean separation of concerns and robust back-end integration (FastAPI/Node.js).
+* **High Performance:** Optimized production build with top-tier Lighthouse scores.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## 🛠️ Tech Stack
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+* **Front-end:** React.js, Vite, Tailwind CSS, Lucide Icons
+* **Routing:** React Router DOM
+* **Architecture:** Component-based structure with a dedicated API service layer
+
+---
+
+## ⚙️ Getting Started
+
+Follow these steps to run the project locally on your machine:
+
+### Prerequisites
+
+Make sure you have **Node.js** installed.
+
+### Installation
+
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/your-username/jobin.git
+   ```
+
+2. Navigate to the project directory:
+
+   ```bash
+   cd jobin
+   ```
+
+3. Install dependencies:
+
+   ```bash
+   npm install
+   ```
+
+4. Run the development server:
+
+   ```bash
+   npm run dev
+   ```
+
+5. Open [http://localhost:5173](http://localhost:5173) in your browser.
+
+---
+
+## 📦 Building for Production
+
+To generate an optimized production build:
+
+```bash
+npm run build
+```
+
+To preview the production build locally:
+
+```bash
+npm run preview
+```
+
+---
+
+## 👥 Authors
+
+* **Amanda Mayumi** - Front-end & Architecture
+* **Marco Túlio Duenãs** - Back-end & Scraping
+
+---
+
+## 📄 License
+
+This project is open-source and available under the [MIT License](LICENSE).
