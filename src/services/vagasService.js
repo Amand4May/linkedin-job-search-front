@@ -1,7 +1,4 @@
-// src/services/vagasService.js
-
-// URL base do back-end em Node.js
-const API_URL = 'http://localhost:3000/api';
+const API_URL = 'http://localhost:3000/api'; // URL base do back-end em Node.js
 
 export async function buscarVagas(cargo, local) {
   try {
