@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Search, MapPin } from 'lucide-react';
+import { buscarVagas } from '../services/vagasService'; 
 
+// Mock de vagas, tirar depois
 const mockVagas = [
   {
     id: '4403070416',
@@ -8,26 +10,8 @@ const mockVagas = [
     company_name: 'RHBH',
     location: 'Belo Horizonte, Minas Gerais, Brazil',
     posted_time: '3 months ago',
-    description: 'Vaga para atuação no setor de RH. Gestão geral do setor de RH...',
+    description: 'Vaga para atuação no setor de RH...',
     url: 'https://www.linkedin.com/jobs/view/4403070416'
-  },
-  {
-    id: '4447342219',
-    title: 'Analista de RH JR',
-    company_name: 'BBM Logística',
-    location: 'São José dos Pinhais, Paraná, Brazil',
-    posted_time: '4 days ago',
-    description: '🚀 Estamos contratando | Analista de Recursos Humanos Jr...',
-    url: 'https://www.linkedin.com/jobs/view/4447342219'
-  },
-  {
-    id: '9999999999',
-    title: 'Desenvolvedor Front-end',
-    company_name: 'TechCorp',
-    location: 'Remoto',
-    posted_time: '1 dia atrás',
-    description: 'Vaga 100% remota para atuar com React e Tailwind CSS...',
-    url: '#'
   }
 ];
 
@@ -61,31 +45,25 @@ export default function Home() {
     cidade.nome.toLowerCase().includes(localBusca.toLowerCase())
   ).slice(0, 6);
 
-  const handleBuscar = (e) => {
+  // Substitui o setTimeout antigo pela chamada do service
+  const handleBuscar = async (e) => {
     e.preventDefault();
     setCarregando(true);
     setFezBusca(true);
     setMostrarSugestoes(false);
 
-    setTimeout(() => {
-      const resultados = mockVagas.filter(vaga => {
-        const bateCargo = termoBusca.trim() === '' || 
-          vaga.title.toLowerCase().includes(termoBusca.toLowerCase()) || 
-          vaga.company_name.toLowerCase().includes(termoBusca.toLowerCase());
-        
-        if (apenasRemoto) {
-          return bateCargo && vaga.location.toLowerCase().includes('remoto');
-        }
-
-        const bateLocal = localBusca.trim() === '' || 
-          vaga.location.toLowerCase().includes(localBusca.toLowerCase());
-
-        return bateCargo && bateLocal;
-      });
-      
+    // Chama o back-end em Node.js através do service
+    const resultados = await buscarVagas(termoBusca, apenasRemoto ? 'remoto' : localBusca);
+    
+    // Se o back-end estiver desligado, o service retorna array vazio []
+    // Podemos tratar para exibir o mock ou manter vazio
+    if (resultados.length > 0) {
       setVagas(resultados);
-      setCarregando(false);
-    }, 800);
+    } else {
+      setVagas([]); // ou manter os mocks se preferir testar 
+    }
+    
+    setCarregando(false);
   };
 
   return (
