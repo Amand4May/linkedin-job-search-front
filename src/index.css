@@ -1,0 +1,36 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --color-fundo: #fffefe;
+    --color-card: #ffffff;
+    --color-texto: #005476;
+    --color-mutado: #007dac;
+    --color-primaria: #007dac;
+    --color-hover: #005476;
+    --color-destaque: #1ebffe;
+    --color-borda: #abe6fe;
+  }
+
+  .dark {
+    --color-fundo: #220e16;
+    --color-card: #4e0c23;
+    --color-texto: #fffefe;
+    --color-mutado: #ff085b;
+    --color-primaria: #aa083f;
+    --color-hover: #7f0a32;
+    --color-destaque: #ff085b;
+    --color-borda: #7f0a32;
+  }
+}
+
+@theme {
+  --color-fundo: var(--color-fundo);
+  --color-card: var(--color-card);
+  --color-texto: var(--color-texto);
+  --color-mutado: var(--color-mutado);
+  --color-primaria: var(--color-primaria);
+  --color-hover: var(--color-hover);
+  --color-destaque: var(--color-destaque);
+  --color-borda: var(--color-borda);
+}
