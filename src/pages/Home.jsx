@@ -79,6 +79,9 @@ export default function Home() {
     setMostrarSugestoes(false);
     setErroBusca('');
 
+    //teste do loading, remover depois
+    await new Promise(resolve => setTimeout(resolve, 3000));
+
     const resultados = await buscarVagas(termoBusca, apenasRemoto ? 'remoto' : localBusca);
 
     if (resultados.length > 0) {
@@ -219,10 +222,33 @@ export default function Home() {
         </p>
       )}
 
+      {/* BLOCO DO SKELETON LOADING INSERIDO AQUI */}
       {carregando && (
-        <div className="flex justify-center mt-12 flex-grow" aria-live="polite">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-destaque"></div>
-        </div>
+        <section className="grid gap-6 mt-6" aria-live="polite" aria-busy="true">
+          {[1, 2, 3].map((item) => (
+            <article key={item} className="border-2 border-borda bg-card p-6 rounded-xl shadow-sm animate-pulse">
+              <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4">
+                <div className="w-full md:w-2/3">
+                  <div className="h-8 bg-borda/60 rounded-md w-3/4 mb-3"></div>
+                  <div className="h-6 bg-borda/50 rounded-md w-1/2 mb-4"></div>
+                  
+                  <div className="flex flex-wrap gap-3 mt-3">
+                    <div className="h-7 bg-borda/40 rounded-full w-28"></div>
+                    <div className="h-7 bg-borda/40 rounded-full w-24"></div>
+                  </div>
+                </div>
+
+                <div className="h-11 w-full md:w-40 bg-borda/50 rounded-lg"></div>
+              </div>
+
+              <div className="mt-6 space-y-2">
+                <div className="h-4 bg-borda/40 rounded w-full"></div>
+                <div className="h-4 bg-borda/40 rounded w-full"></div>
+                <div className="h-4 bg-borda/40 rounded w-2/3"></div>
+              </div>
+            </article>
+          ))}
+        </section>
       )}
 
       {!carregando && fezBusca && vagas.length === 0 && (
